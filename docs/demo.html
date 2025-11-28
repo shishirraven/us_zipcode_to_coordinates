@@ -123,7 +123,7 @@ console.log(convert('10001'))</code></pre>
                   <h3 class="text-lg font-semibold">Interactive Demo</h3>
                   <p class="text-sm text-slate-500">Type a ZIP and click lookup.</p>
                 </div>
-                <div id="status" class="text-sm text-slate-500">Loading library…</div>
+                <div id="status" class="text-sm text-slate-500">Initializing demo (loading library from CDN)…</div>
               </div>
 
               <div class="mt-4">
@@ -133,7 +133,7 @@ console.log(convert('10001'))</code></pre>
                     class="flex-1 px-4 py-3 rounded-lg border border-slate-200 focus:ring-2 focus:ring-sky-300 bg-slate-50" />
                   <button id="lookupBtn" class="px-4 py-3 bg-sky-600 hover:bg-sky-700 text-white rounded-lg disabled:opacity-60" disabled>Lookup</button>
                 </div>
-                <div class="mt-3 text-xs text-slate-400">Local first: <code class="bg-slate-100 px-1 rounded">dist/zip-coords-us.min.js</code></div>
+                <div class="mt-3 text-xs text-slate-400">This demo loads the UMD bundle from the public CDN (unpkg).</div>
               </div>
 
               <div id="error" class="mt-4 hidden rounded-md p-3 bg-red-50 border border-red-100 text-red-700 text-sm"></div>
@@ -146,7 +146,7 @@ console.log(convert('10001'))</code></pre>
                 </div>
               </div>
 
-              <p class="mt-4 text-xs text-slate-400">If you don't have a local build, run <code class="bg-slate-100 px-1 rounded">npx rollup -c</code>.</p>
+              <p class="mt-4 text-xs text-slate-400">No local build required for the demo — served from CDN.</p>
             </div>
 
             <div class="mt-4 text-center text-xs text-slate-400">
@@ -175,7 +175,7 @@ console.log(convert('10001'))</code></pre>
     });
   </script>
 
-  <!-- existing demo logic -->
+  <!-- existing demo logic (loads from CDN only) -->
   <script src="demo.js"></script>
 </body>
 </html>

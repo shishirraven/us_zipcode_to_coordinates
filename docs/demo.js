@@ -17,27 +17,22 @@
     });
   }
 
-  // Try local build first, then unpkg as fallback
+  // Load from CDN only
   (async function init() {
-    const local = '../dist/zip-coords-us.min.js';
     const cdn = 'https://unpkg.com/zip-coords-us/dist/zip-coords-us.min.js';
+    statusEl.textContent = 'Loading library from CDN…';
     try {
-      await loadScript(local);
-      statusEl.textContent = 'Library loaded from local dist/zip-coords-us.min.js';
-    } catch (e1) {
-      try {
-        await loadScript(cdn);
-        statusEl.textContent = 'Library loaded from CDN (unpkg)';
-      } catch (e2) {
-        statusEl.textContent = 'Library not available. Build the project to get a local bundle or ensure network access to CDN.';
-        errorEl.hidden = false;
-        errorEl.textContent = 'Could not load the library. Run `npx rollup -c` to produce `dist/zip-coords-us.min.js`, or enable network access to the CDN.';
-        lookupBtn.disabled = true;
-        return;
-      }
+      await loadScript(cdn);
+      statusEl.textContent = 'Library loaded from CDN (unpkg)';
+      lookupBtn.disabled = false;
+    } catch (err) {
+      statusEl.textContent = 'Library failed to load from CDN.';
+      errorEl.hidden = false;
+      errorEl.textContent = 'Could not load library from CDN. Check network or use a local build if offline.';
+      lookupBtn.disabled = true;
+      console.error(err);
+      return;
     }
-    // ready
-    lookupBtn.disabled = false;
   })();
 
   function padZip(s) {
@@ -69,8 +64,7 @@
       return;
     }
 
-    // Use UMD global if available
-    const lib = window.ZipCoordsUS || (window.zipCoordsUs) || null;
+    const lib = window.ZipCoordsUS || window.zipCoordsUs || null;
     if (!lib || typeof lib.convert !== 'function') {
       errorEl.hidden = false;
       errorEl.textContent = 'Library not loaded or has unexpected shape.';
