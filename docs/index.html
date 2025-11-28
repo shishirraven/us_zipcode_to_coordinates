@@ -3,53 +3,423 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>zip-coords-us — Docs</title>
-  <link rel="stylesheet" href="styles.css" />
+  <title>zip-coords-us — Docs & Demo</title>
+
+  <!-- Tailwind CDN (utility-first modern styling) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <meta name="theme-color" content="#0ea5e9">
+  <style>
+    /* tiny custom tweaks */
+    html { scroll-behavior: smooth; }
+
+    /* New visual polish */
+    .hero {
+      background: linear-gradient(180deg, rgba(14,165,233,0.06), rgba(14,165,233,0.02));
+      border-radius: 18px;
+      padding: 18px;
+    }
+
+    /* Animated reveal for result panel */
+    #result { max-height: 0; opacity: 0; transform: translateY(-6px); overflow: hidden; transition: max-height .36s ease, opacity .28s ease, transform .36s ease; }
+    #result.open { max-height: 800px; opacity: 1; transform: translateY(0); }
+
+    /* larger, modern controls */
+    .control-input { font-size: 1.05rem; padding: .75rem 1rem; border-radius: .75rem; box-shadow: 0 6px 18px rgba(2,6,23,0.04); }
+    .control-btn { padding: .75rem 1.25rem; border-radius: .75rem; box-shadow: 0 8px 20px rgba(2,6,23,0.06); }
+
+    /* Responsive tweaks */
+    @media (max-width: 640px) {
+      .hero { padding: 14px; border-radius: 14px; }
+      .control-input { font-size: 0.98rem; padding: .6rem .9rem; }
+      .control-btn { width: 100%; padding: .7rem 1rem; }
+      /* ensure result panel animates cleanly on mobile */
+      #result.open { max-height: 1000px; }
+      /* reduce map height on very small screens */
+      .map-small { height: 220px !important; }
+    }
+  </style>
 </head>
-<body>
-  <header>
-    <h1>zip-coords-us</h1>
-    <p>Small, fast ZIP → coordinates lookup library for U.S. 5-digit ZIP codes.</p>
-    <nav>
-      <a href="index.html">Docs</a>
-      <a href="demo.html">Interactive Demo</a>
-      <a href="../readme.md">README</a>
-    </nav>
-  </header>
 
-  <main>
-    <section>
-      <h2>Quick Start</h2>
-      <p>Install and build as described in the project README. The interactive demo will try to load the local UMD build (<code>dist/zip-coords-us.min.js</code>) and fall back to the CDN.</p>
-    </section>
+<body class="bg-gradient-to-b from-slate-50 to-white text-slate-900 antialiased">
+  <div class="min-h-screen container mx-auto px-4 py-10">
+    <div class="max-w-7xl mx-auto">
 
-    <section>
-      <h2>API</h2>
-      <p>The primary API is <code>convert(zip)</code> which returns <code>{ latitude, longitude }</code> or <code>null</code>.</p>
-      <pre>
-convert('10001') → { latitude: 40.7506, longitude: -73.9970 }
-      </pre>
-    </section>
+      <!-- header: stack on small screens, align row on md+ -->
+      <header class="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 mb-8 hero">
+        <div class="flex items-center gap-4">
+          <div class="w-14 h-14 rounded-2xl bg-sky-600 flex items-center justify-center text-white font-bold text-lg shadow-md">ZC</div>
+          <div>
+            <h1 class="text-3xl font-extrabold leading-tight">zip-coords-us</h1>
+            <p class="text-sm text-slate-500 mt-1">Tiny, blazing-fast ZIP → coordinates lookup (ZCTA centroids)</p>
+          </div>
+        </div>
 
-    <section>
-      <h2>Publish</h2>
-      <ol>
-        <li>Push this repo to GitHub.</li>
-        <li>Repository → Settings → Pages → Source: select branch and <code>docs/</code> folder.</li>
-        <li>Visit the provided Pages URL.</li>
-      </ol>
-    </section>
-  </main>
+        <div class="flex items-center gap-4">
+          <nav class="hidden md:flex items-center gap-4 text-sm text-slate-600">
+            <a href="#overview" class="hover:text-sky-600">Overview</a>
+            <a href="#api" class="hover:text-sky-600">API</a>
+            <a href="#demo" class="hover:text-sky-600">Demo</a>
+            <a href="#publish" class="hover:text-sky-600">Publish</a>
+          </nav>
+          <a class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-sky-600 text-white text-sm shadow-sm" href="https://iamshishir.com" target="_blank" rel="noopener">iamshishir.com</a>
+        </div>
+      </header>
 
-  <footer>
-    <p>Built for fast O(1) ZIP → coords lookups. Demo uses UMD global <code>ZipCoordsUS</code>.</p>
-  </footer>
+      <main class="grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
+        <!-- Docs column -->
+        <section class="md:col-span-2 space-y-6" id="overview">
+          <article class="bg-white p-6 rounded-2xl shadow">
+            <div class="flex items-start justify-between">
+              <div>
+                <h2 class="text-lg font-semibold">Overview</h2>
+                <p class="mt-1 text-sm text-slate-500">A super-efficient, lazy-loaded map for converting 5-digit US ZIP codes to their centroid latitude/longitude. O(1) lookups after first load.</p>
+              </div>
+              <div class="text-sm text-slate-400">v1 • ZCTA-based</div>
+            </div>
 
+            <div class="mt-4 grid gap-3 sm:grid-cols-2">
+              <div class="rounded-lg bg-slate-50 p-3">
+                <div class="text-xs text-slate-500">Lookup</div>
+                <div class="mt-1 font-medium">convert(zip)</div>
+              </div>
+              <div class="rounded-lg bg-slate-50 p-3">
+                <div class="text-xs text-slate-500">Return</div>
+                <div class="mt-1 font-medium">{ latitude: number, longitude: number } | null</div>
+              </div>
+            </div>
+          </article>
+
+          <article id="api" class="bg-white p-6 rounded-2xl shadow">
+            <h3 class="text-md font-semibold">API</h3>
+            <p class="mt-2 text-sm text-slate-500">Primary function:</p>
+            <pre class="mt-3 bg-slate-100 rounded-md p-3 text-sm overflow-x-auto"><code>// convert accepts string or number (padded to 5 digits)
+const coords = ZipCoordsUS.convert('10001'); // { latitude, longitude } or null
+</code></pre>
+
+            <div class="mt-4 text-sm text-slate-600">
+              <strong>Notes:</strong>
+              <ul class="list-disc pl-5 mt-2 text-slate-500">
+                <li>ZIP normalization pads numeric input to 5 digits (e.g. 601 → "00601").</li>
+                <li>Coordinates are ZCTA centroids from U.S. Census Bureau data.</li>
+              </ul>
+            </div>
+          </article>
+
+          <article id="usage" class="bg-white p-6 rounded-2xl shadow">
+            <h3 class="text-md font-semibold">Usage Examples</h3>
+            <div class="mt-3 grid gap-3">
+              <div class="bg-slate-50 p-3 rounded-md text-sm">
+                <strong>Install</strong>
+                <pre class="mt-2 text-xs"><code>npm install zip-coords-us</code></pre>
+              </div>
+
+              <div class="bg-slate-50 p-3 rounded-md text-sm">
+                <strong>Node / CommonJS (example)</strong>
+                <pre class="mt-2 text-xs"><code>// index.js (Node.js)
+const { convert } = require('zip-coords-us');
+
+// First call loads the data, subsequent calls are instant
+const coords = convert('10001'); 
+console.log(`ZIP 10001: Lat ${coords.latitude}, Lng ${coords.longitude}`);</code></pre>
+
+                <div class="mt-2 text-xs text-slate-500">
+                  Add a package.json script to run this example via npm:
+                </div>
+                <pre class="mt-2 text-xs"><code>{
+  "name": "zip-demo",
+  "version": "1.0.0",
+  "scripts": {
+    "demo": "node index.js"
+  },
+  "dependencies": {
+    "zip-coords-us": "^1.0.0"
+  }
+}</code></pre>
+                <div class="mt-2 text-xs text-slate-500">
+                  Run with:
+                </div>
+                <pre class="mt-2 text-xs"><code>npm install
+npm run demo</code></pre>
+              </div>
+
+              <div class="bg-slate-50 p-3 rounded-md text-sm">
+                <strong>Browser / CDN (UMD)</strong>
+                <pre class="mt-2 text-xs"><code>&lt;script src="https://unpkg.com/zip-coords-us/dist/zip-coords-us.min.js"&gt;&lt;/script&gt;
+&lt;script&gt;
+  // UMD global available as ZipCoordsUS
+  const coords = ZipCoordsUS.convert('90210');
+  if (coords) {
+    console.log(`ZIP 90210: Lat ${coords.latitude}, Lng ${coords.longitude}`);
+  }
+&lt;/script&gt;</code></pre>
+              </div>
+            </div>
+          </article>
+
+          <article id="publish" class="bg-white p-6 rounded-2xl shadow">
+            <h3 class="text-md font-semibold">Build & Publish</h3>
+            <ol class="list-decimal pl-5 mt-3 text-sm text-slate-600">
+              <li>Install deps: <code>npm install</code></li>
+              <li>Build UMD: <code>npx rollup -c</code> (produces <code>dist/zip-coords-us.min.js</code>)</li>
+              <li>Publish docs to GitHub Pages: push repo, Settings → Pages → select <code>docs/</code> folder or use this single-file site in <code>docs/</code>.</li>
+            </ol>
+            <p class="mt-3 text-xs text-slate-400">The included demo tries to load the local dist file first and falls back to the public CDN.</p>
+          </article>
+
+          <article class="bg-white p-6 rounded-2xl shadow">
+            <h3 class="text-md font-semibold">Author & License</h3>
+            <p class="mt-2 text-sm text-slate-600">Built by <a class="text-sky-600 hover:underline" href="https://iamshishir.com" target="_blank" rel="noopener">iamshishir.com</a>. Distributed under the ISC License.</p>
+          </article>
+        </section>
+
+        <!-- Demo column -->
+        <aside id="demo" class="md:col-span-1">
+          <div class="relative md:sticky md:top-24"> <!-- changed: sticky only on md+ -->
+            <div class="bg-white p-6 rounded-2xl shadow-lg border border-slate-100">
+              <div class="flex items-start justify-between gap-3">
+                <div>
+                  <h3 class="text-lg font-semibold">Interactive Demo</h3>
+                  <p class="text-sm text-slate-500">Type a ZIP and click lookup.</p>
+                </div>
+                <div id="status" class="text-sm text-slate-500">Initializing demo (loading library from CDN)…</div>
+              </div>
+
+              <div class="mt-4">
+                <label for="zipInput" class="sr-only">ZIP code</label>
+
+                <!-- responsive input: stacked on narrow screens, inline on sm+ -->
+                <div class="flex flex-col sm:flex-row gap-3 items-stretch">
+                  <div class="relative flex-1">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+                      <!-- icon -->
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M11 19a8 8 0 100-16 8 8 0 000 16z"/></svg>
+                    </span>
+                    <input id="zipInput" type="text" maxlength="5" placeholder="e.g. 10001"
+                      class="control-input w-full pl-11 pr-4 border border-slate-200 focus:ring-2 focus:ring-sky-300 bg-white" />
+                  </div>
+
+                  <div class="sm:w-auto">
+                    <button id="lookupBtn" class="control-btn bg-sky-600 hover:bg-sky-700 text-white font-medium w-full sm:w-auto" disabled>
+                      Lookup
+                    </button>
+                  </div>
+                </div>
+
+                <div class="mt-3 text-xs text-slate-400">This demo loads the UMD bundle from the public CDN (unpkg).</div>
+              </div>
+
+              <div id="error" class="mt-4 hidden rounded-md p-3 bg-red-50 border border-red-100 text-red-700 text-sm"></div>
+
+              <!-- RESULT: moved directly below the form and redesigned, animated -->
+              <div id="result" class="mt-4 rounded-2xl overflow-hidden border border-emerald-100 shadow-sm bg-white transition-all duration-200">
+                <div class="p-4 flex items-start justify-between gap-3">
+                  <div>
+                    <div id="coordsText" class="text-xl font-semibold text-emerald-700">Lat, Lng</div>
+                    <div id="coordsShort" class="text-sm text-slate-500 mt-1">Coordinates will appear here</div>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <button id="copyBtn" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-md text-sm">Copy</button>
+                    <a id="mapsLink" class="inline-flex items-center gap-2 px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-md text-sm" href="#" target="_blank" rel="noopener">Open in Google Maps</a>
+                  </div>
+                </div>
+
+                <div class="px-4 pb-4">
+                  <pre id="coordsJSON" class="mt-3 bg-slate-50 p-3 rounded text-xs text-slate-700 overflow-x-auto h-20"></pre>
+                </div>
+
+                <!-- small embedded map preview (no API key); use map-small on mobile -->
+                <div class="h-48 md:h-40 border-t border-emerald-100 map-small" style="background:#e6f9ef;">
+                  <iframe id="mapFrame" class="w-full h-full" frameborder="0" loading="lazy" src="" allowfullscreen></iframe>
+                </div>
+              </div>
+              <!-- /RESULT -->
+
+              <p class="mt-4 text-xs text-slate-400">No local build required for the demo — served from CDN.</p>
+            </div>
+
+            <div class="mt-4 text-center text-xs text-slate-400">
+              <div>Data: U.S. Census ZCTA centroids</div>
+              <div class="mt-2">Made with ♥ by <a class="text-sky-600 hover:underline" href="https://iamshishir.com" target="_blank" rel="noopener">iamshishir.com</a></div>
+            </div>
+          </div>
+        </aside>
+      </main>
+    </div>
+  </div>
+
+  <!-- Replaced static CDN + inline script with a robust dynamic loader and DOM-ready init -->
   <script>
-    // lightweight enhancement: highlight nav current page
-    document.querySelectorAll('nav a').forEach(a => {
-      if (a.getAttribute('href') === location.pathname.split('/').pop()) a.classList.add('active');
-    });
+    (function () {
+      const CDN = 'https://unpkg.com/zip-coords-us/dist/zip-coords-us.min.js';
+      let lib = null;
+
+      function loadScript(url, timeout = 10000) {
+        return new Promise((resolve, reject) => {
+          const s = document.createElement('script');
+          let timedOut = false;
+          const t = setTimeout(() => {
+            timedOut = true;
+            s.onerror = null;
+            s.onload = null;
+            reject(new Error('Loading timed out: ' + url));
+          }, timeout);
+
+          s.src = url;
+          s.async = true;
+          s.onload = () => {
+            if (timedOut) return;
+            clearTimeout(t);
+            resolve(url);
+          };
+          s.onerror = (e) => {
+            if (timedOut) return;
+            clearTimeout(t);
+            reject(new Error('Failed to load ' + url));
+          };
+          document.head.appendChild(s);
+        });
+      }
+
+      function query(id) { return document.getElementById(id); }
+
+      function initOnce() {
+        const statusEl = query('status');
+        const errorEl = query('error');
+        const resultEl = query('result');
+        const coordsText = query('coordsText');
+        const coordsShort = query('coordsShort');
+        const coordsJSON = query('coordsJSON');
+        const mapFrame = query('mapFrame');
+        const mapsLink = query('mapsLink');
+        const zipInput = query('zipInput');
+        const lookupBtn = query('lookupBtn');
+
+        if (!statusEl || !errorEl || !resultEl || !coordsText || !coordsJSON || !mapFrame || !mapsLink || !zipInput || !lookupBtn) {
+          console.error('Demo: missing required DOM elements');
+          return;
+        }
+
+        function setStatus(msg) { statusEl.textContent = msg; }
+        function setError(msg) { errorEl.hidden = false; errorEl.textContent = msg; }
+        function clearError() { errorEl.hidden = true; errorEl.textContent = ''; }
+
+        function padZip(s) {
+          s = String(s || '').trim().replace(/\D/g, '');
+          return s ? s.padStart(5, '0').slice(-5) : '';
+        }
+
+        function showResult(lat, lng) {
+          // animate open
+          resultEl.classList.add('open');
+          resultEl.hidden = false;
+          coordsText.textContent = `Latitude: ${lat.toFixed(6)}, Longitude: ${lng.toFixed(6)}`;
+          coordsShort.textContent = `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+          if (coordsJSON) coordsJSON.textContent = JSON.stringify({ latitude: lat, longitude: lng }, null, 2);
+          const q = encodeURIComponent(`${lat},${lng}`);
+          mapsLink.href = `https://www.google.com/maps?q=${q}`;
+          mapFrame.src = `https://www.google.com/maps?q=${q}&output=embed`;
+          setStatus(`Found — Lat ${lat.toFixed(6)}, Lng ${lng.toFixed(6)}`);
+        }
+
+        function hideResult() {
+          resultEl.classList.remove('open');
+          // keep element present (animation will collapse) and clear iframe to save requests
+          mapFrame.src = '';
+        }
+
+        function showNotFound(zip) {
+          hideResult();
+          setError(`No coordinates found for ZIP "${zip}".`);
+        }
+
+        // disable button until library loaded
+        lookupBtn.disabled = true;
+        setStatus('Loading library from CDN…');
+
+        loadScript(CDN).then(() => {
+          lib = window.ZipCoordsUS || window.zipCoordsUs || (window.ZipCoordsUS && window.ZipCoordsUS.default) || null;
+          if (!lib && window.zipCoordsUs) lib = window.zipCoordsUs;
+          if (!lib && window.ZipCoordsUS) lib = window.ZipCoordsUS;
+
+          if (lib && typeof lib.convert === 'function') {
+            setStatus('Library loaded from CDN (unpkg)');
+            lookupBtn.disabled = false;
+            clearError();
+            console.info('zip-coords-us: library ready', lib);
+          } else {
+            setStatus('Library loaded but API not detected');
+            setError('Library loaded but global API not found. Check console for details.');
+            console.warn('zip-coords-us: expected API not found', window);
+          }
+        }).catch((err) => {
+          console.error(err);
+          setStatus('Failed to load library from CDN.');
+          setError('Could not load library from CDN. Check network and try again.');
+        });
+
+        async function doLookup() {
+          clearError();
+          hideResult();
+          const raw = zipInput.value;
+          const zip = padZip(raw);
+          if (!zip || zip.length !== 5) {
+            setError('Please enter a valid 5-digit ZIP code.');
+            return;
+          }
+          if (!lib || typeof lib.convert !== 'function') {
+            setError('Library not ready yet. Try again in a moment.');
+            return;
+          }
+
+          try {
+            setStatus('Looking up…');
+            lookupBtn.disabled = true;
+            const coords = lib.convert(zip);
+            if (!coords) {
+              showNotFound(zip);
+              setStatus('Not found');
+            } else {
+              showResult(coords.latitude, coords.longitude);
+            }
+          } catch (err) {
+            console.error('Lookup error:', err);
+            setError('Lookup failed — see console for details.');
+            setStatus('Error');
+          } finally {
+            lookupBtn.disabled = false;
+            zipInput.focus();
+          }
+        }
+
+        lookupBtn.addEventListener('click', doLookup);
+        zipInput.addEventListener('keyup', (e) => { if (e.key === 'Enter') doLookup(); });
+
+        // hide result/error initially
+        resultEl.hidden = true;
+        resultEl.classList.remove('open');
+        clearError();
+
+        // copy button: copy JSON coords if available, otherwise copy text
+        document.addEventListener('click', (e) => {
+          if (e.target && e.target.id === 'copyBtn') {
+            const el = e.target;
+            const payload = (coordsJSON && coordsJSON.textContent) ? coordsJSON.textContent : (coordsShort && coordsShort.textContent ? coordsShort.textContent : '');
+            if (!payload) return;
+            navigator.clipboard?.writeText(payload);
+            const prev = el.textContent;
+            el.textContent = 'Copied';
+            setTimeout(() => el.textContent = prev, 1200);
+          }
+        });
+      }
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initOnce, { once: true });
+      } else {
+        initOnce();
+      }
+    })();
   </script>
+
 </body>
 </html>
