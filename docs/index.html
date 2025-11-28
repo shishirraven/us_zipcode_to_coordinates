@@ -19,23 +19,47 @@
       padding: 18px;
     }
 
-    /* Animated reveal for result panel */
-    #result { max-height: 0; opacity: 0; transform: translateY(-6px); overflow: hidden; transition: max-height .36s ease, opacity .28s ease, transform .36s ease; }
-    #result.open { max-height: 800px; opacity: 1; transform: translateY(0); }
+    /* Animated reveal for result panel - use transform + max-height for smooth collapse */
+    #result { max-height: 0; opacity: 0; transform: translateY(-6px); overflow: hidden; transition: max-height .36s ease, opacity .28s ease, transform .36s ease, padding .28s ease; padding: 0; }
+    #result.open { max-height: 1200px; opacity: 1; transform: translateY(0); padding: 1rem 0 0; }
 
     /* larger, modern controls */
     .control-input { font-size: 1.05rem; padding: .75rem 1rem; border-radius: .75rem; box-shadow: 0 6px 18px rgba(2,6,23,0.04); }
     .control-btn { padding: .75rem 1.25rem; border-radius: .75rem; box-shadow: 0 8px 20px rgba(2,6,23,0.06); }
 
+    /* responsive action buttons inside result */
+    .result-actions { display: flex; gap: 0.5rem; align-items: center; }
+    .result-actions .btn { flex: 1; min-width: 0; }
+
+    /* Map responsive wrapper */
+    .map-small { height: 220px; }
+
     /* Responsive tweaks */
+    @media (max-width: 1024px) {
+      /* slightly smaller hero on tablets */
+      .hero { padding: 16px; }
+    }
+
     @media (max-width: 640px) {
       .hero { padding: 14px; border-radius: 14px; }
       .control-input { font-size: 0.98rem; padding: .6rem .9rem; }
       .control-btn { width: 100%; padding: .7rem 1rem; }
+
       /* ensure result panel animates cleanly on mobile */
       #result.open { max-height: 1000px; }
+
       /* reduce map height on very small screens */
       .map-small { height: 220px !important; }
+
+      /* stack result actions vertically on mobile */
+      .result-actions { flex-direction: column; }
+      .result-actions .btn { width: 100%; }
+
+      /* make JSON block scrollable but not too tall */
+      #coordsJSON { max-height: 160px; }
+
+      /* improve spacing for compact layout */
+      .px-4 { padding-left: 1rem; padding-right: 1rem; }
     }
   </style>
 </head>
@@ -61,7 +85,7 @@
             <a href="#demo" class="hover:text-sky-600">Demo</a>
             <a href="#publish" class="hover:text-sky-600">Publish</a>
           </nav>
-          <a class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-sky-600 text-white text-sm shadow-sm" href="https://iamshishir.com" target="_blank" rel="noopener">iamshishir.com</a>
+          <a class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-sky-600 text-white text-sm shadow-sm" href="https://iamshishir.com" target="_blank" rel="noopener noreferrer">iamshishir.com</a>
         </div>
       </header>
 
@@ -163,12 +187,124 @@ npm run demo</code></pre>
               <li>Build UMD: <code>npx rollup -c</code> (produces <code>dist/zip-coords-us.min.js</code>)</li>
               <li>Publish docs to GitHub Pages: push repo, Settings → Pages → select <code>docs/</code> folder or use this single-file site in <code>docs/</code>.</li>
             </ol>
-            <p class="mt-3 text-xs text-slate-400">The included demo tries to load the local dist file first and falls back to the public CDN.</p>
+            <p class="mt-3 text-xs text-slate-400">The interactive demo is served from the public CDN (unpkg) — no local build is required for the demo to run.</p>
           </article>
 
           <article class="bg-white p-6 rounded-2xl shadow">
             <h3 class="text-md font-semibold">Author & License</h3>
             <p class="mt-2 text-sm text-slate-600">Built by <a class="text-sky-600 hover:underline" href="https://iamshishir.com" target="_blank" rel="noopener">iamshishir.com</a>. Distributed under the ISC License.</p>
+          </article>
+
+          <!-- Add full documentation article -->
+          <article id="full-docs" class="bg-white p-6 rounded-2xl shadow mt-6">
+            <h3 class="text-md font-semibold">Full Documentation</h3>
+
+            <section class="mt-4">
+              <h4 class="font-semibold">⬇️ Installation</h4>
+
+              <h5 class="mt-3 text-sm font-medium">1. For Node.js / Module Bundlers</h5>
+              <pre class="mt-2 bg-slate-50 p-3 rounded text-xs"><code>npm install zip-coords-us</code></pre>
+
+              <h5 class="mt-3 text-sm font-medium">2. For Vanilla JavaScript / CDN</h5>
+              <p class="text-sm text-slate-600">Load the minified UMD bundle via CDN (Unpkg):</p>
+              <pre class="mt-2 bg-slate-50 p-3 rounded text-xs"><code>&lt;script src="https://unpkg.com/zip-coords-us/dist/zip-coords-us.min.js"&gt;&lt;/script&gt;</code></pre>
+            </section>
+
+            <hr class="my-4"/>
+
+            <section>
+              <h4 class="font-semibold">🚀 Usage</h4>
+
+              <h5 class="mt-3 text-sm font-medium">1. Node.js / NPM Module</h5>
+              <p class="text-sm text-slate-600">Require the package and destructure the <code>convert</code> function:</p>
+              <pre class="mt-2 bg-slate-50 p-3 rounded text-xs"><code>// index.js (Node.js)
+
+const { convert } = require('zip-coords-us');
+
+// First call loads the data, subsequent calls are instant
+const coords = convert('10001'); 
+console.log(`ZIP 10001: Lat ${coords.latitude}, Lng ${coords.longitude}`);
+</code></pre>
+
+              <h5 class="mt-3 text-sm font-medium">2. CDN / Vanilla JavaScript</h5>
+              <p class="text-sm text-slate-600">After loading the script via CDN, use the global <code>ZipCoordsUS</code>:</p>
+              <pre class="mt-2 bg-slate-50 p-3 rounded text-xs"><code>&lt;script&gt;
+  // Access the convert method from the global variable
+  const coords = ZipCoordsUS.convert(90210);
+
+  if (coords) {
+    console.log(`ZIP 90210: Lat ${coords.latitude}, Lng ${coords.longitude}`);
+  } else {
+    console.log("ZIP code not found.");
+  }
+&lt;/script&gt;</code></pre>
+            </section>
+
+            <hr class="my-4"/>
+
+            <section>
+              <h4 class="font-semibold">📚 API Reference</h4>
+
+              <h5 class="mt-3 text-sm font-medium">convert(zip_code)</h5>
+              <p class="text-sm text-slate-600">Parameters:</p>
+              <div class="mt-2 text-sm text-slate-500">
+                <ul class="list-disc pl-5">
+                  <li><strong>zip_code</strong> — <code>string</code> or <code>number</code>: The 5-digit US ZIP code (will be padded with zeros if necessary, e.g., 601 → "00601").</li>
+                </ul>
+              </div>
+
+              <p class="mt-3 text-sm text-slate-600">Returns:</p>
+              <div class="mt-2 text-sm text-slate-500">
+                <ul class="list-disc pl-5">
+                  <li><strong>Found:</strong> <code>object</code> — <code>{ latitude: number, longitude: number }</code></li>
+                  <li><strong>Not Found:</strong> <code>null</code> — Returns <code>null</code> if the ZIP code is not in the map.</li>
+                </ul>
+              </div>
+            </section>
+
+            <hr class="my-4"/>
+
+            <section>
+              <h4 class="font-semibold">🛠️ Data Source & Methodology</h4>
+              <p class="text-sm text-slate-600 mt-2">The underlying JSON data map (<code>us_zip_to_coords_map.json</code>) was generated from the <strong>U.S. Census Bureau's ZCTA Gazetteer Files</strong>.</p>
+              <p class="text-sm text-slate-600 mt-2">If you wish to download the raw CSV file to update the library's data yourself, find the files at the official source page:</p>
+              <p class="mt-2 text-sm"><a class="text-sky-600 hover:underline" href="https://www.census.gov/geographies/reference-files/time-series/geo/gazetteer-files.html" target="_blank" rel="noopener noreferrer">Download the ZCTA Gazetteer File CSV/TXT (U.S. Census Bureau)</a></p>
+
+              <p class="text-sm text-slate-500 mt-2"><strong>Note on ZCTAs:</strong> The Census Bureau uses ZIP Code Tabulation Areas (ZCTAs) for statistical mapping; these are approximations of USPS ZIP code areas.</p>
+            </section>
+
+            <hr class="my-4"/>
+
+            <section>
+              <h4 class="font-semibold">🤝 Contributing & License</h4>
+
+              <h5 class="mt-2 text-sm font-medium">Contributing</h5>
+              <p class="text-sm text-slate-600">Contributions welcome — please open issues or pull requests to improve the library or update data.</p>
+
+              <h5 class="mt-2 text-sm font-medium">License</h5>
+              <p class="text-sm text-slate-600">Distributed under the <strong>ISC License</strong>. Copyright (c) 2025 <strong>Shishir Raven</strong>.</p>
+            </section>
+
+            <hr class="my-4"/>
+
+            <section>
+              <h4 class="font-semibold">Summary & Troubleshooting</h4>
+              <p class="text-sm text-slate-600 mt-2">Small, fast ZIP → coordinates lookup library. Source exports both default and named exports; builds produce UMD and CJS bundles. See below for quick build & troubleshooting tips.</p>
+
+              <h5 class="mt-3 text-sm font-medium">Quick Build</h5>
+              <pre class="mt-2 bg-slate-50 p-3 rounded text-xs"><code>npm install
+npx rollup -c
+# UMD bundle appears at dist/zip-coords-us.min.js</code></pre>
+
+              <h5 class="mt-3 text-sm font-medium">Troubleshooting</h5>
+              <div class="text-sm text-slate-500 mt-2">
+                <ul class="list-disc pl-5">
+                  <li><strong>"module is not defined" in browser:</strong> Ensure UMD build produced correctly (no raw CommonJS). Check rollup config plugin order (resolve before commonjs).</li>
+                  <li><strong>ZipCoordsUS missing on window:</strong> Verify UMD output has <code>name: 'ZipCoordsUS'</code> and the built file is correct.</li>
+                  <li><strong>Demo errors:</strong> Open browser console to inspect runtime errors.</li>
+                </ul>
+              </div>
+            </section>
           </article>
         </section>
 
@@ -217,9 +353,9 @@ npm run demo</code></pre>
                     <div id="coordsText" class="text-xl font-semibold text-emerald-700">Lat, Lng</div>
                     <div id="coordsShort" class="text-sm text-slate-500 mt-1">Coordinates will appear here</div>
                   </div>
-                  <div class="flex items-center gap-2">
-                    <button id="copyBtn" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-md text-sm">Copy</button>
-                    <a id="mapsLink" class="inline-flex items-center gap-2 px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-md text-sm" href="#" target="_blank" rel="noopener">Open in Google Maps</a>
+                  <div class="result-actions">
+                    <button id="copyBtn" class="btn px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-md text-sm">Copy</button>
+                    <a id="mapsLink" class="btn inline-flex items-center justify-center gap-2 px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-md text-sm" href="#" target="_blank" rel="noopener">Open in Google Maps</a>
                   </div>
                 </div>
 

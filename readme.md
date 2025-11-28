@@ -33,7 +33,7 @@ npm install zip-coords-us
 You can load the minified file directly in your HTML via a CDN (like Unpkg or jsDelivr), making the library available as the global variable **`ZipCoordsUS`**:
 
 ```html
-<script src="[https://unpkg.com/zip-coords-us/dist/zip-coords-us.min.js](https://unpkg.com/zip-coords-us/dist/zip-coords-us.min.js)"></script>
+<script src="https://unpkg.com/zip-coords-us/dist/zip-coords-us.min.js"></script>
 ```
 
 -----
