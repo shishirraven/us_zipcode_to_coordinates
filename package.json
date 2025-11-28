@@ -1,0 +1,39 @@
+{
+  "name": "zip-coords-us",
+  "version": "1.0.4",
+  "description": "Super efficient, lazy-loaded library for converting US ZIP Codes (ZCTAs) to latitude and longitude.",
+  "type": "module",
+  "main": "dist/index.js",
+  "browser": "dist/zip-coords-us.min.js",
+  "unpkg": "dist/zip-coords-us.min.js",
+  "jsdelivr": "dist/zip-coords-us.min.js",
+  "scripts": {
+    "build": "rollup -c",
+    "prepublishOnly": "npm run build"
+  },
+  "files": [
+    "dist/",
+    "data/"
+  ],
+  "keywords": [
+    "zip code",
+    "geocoding",
+    "latitude",
+    "longitude",
+    "us",
+    "zcta"
+  ],
+  "author": {
+    "name": "Shishir Raven",
+    "email": "shishir.raven@gmail.com",
+    "url": "https://iamshishir.com"
+  },
+  "license": "ISC",
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "^25.0.7",
+    "@rollup/plugin-json": "^10.0.0",
+    "@rollup/plugin-node-resolve": "^15.2.3",
+    "rollup": "^4.9.6",
+    "rollup-plugin-terser": "^7.0.2"
+  }
+}

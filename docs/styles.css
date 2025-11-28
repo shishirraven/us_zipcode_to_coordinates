@@ -1,0 +1,32 @@
+/* Basic docs/demo styling */
+:root {
+  --bg:#fff;
+  --fg:#0b1220;
+  --muted:#6b7280;
+  --accent:#0366d6;
+  --card:#f8fafc;
+}
+
+body {
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  color: var(--fg);
+  margin: 0;
+  padding: 24px;
+  background: var(--bg);
+}
+
+header, main { max-width: 900px; margin: 0 auto; }
+
+header h1 { margin: 0 0 8px; }
+nav a { margin-right: 12px; color: var(--accent); text-decoration: none; }
+nav a.active { font-weight: 600; }
+
+.demo { padding-top: 20px; }
+.controls { display:flex; gap:8px; margin-bottom:12px; }
+.controls input { padding:8px 10px; font-size:16px; width:160px; border:1px solid #e6edf3; border-radius:6px; }
+.controls button { padding:8px 12px; font-size:16px; border-radius:6px; background:var(--accent); color:white; border:none; cursor:pointer; }
+
+.status { color: var(--muted); margin-bottom:8px; }
+.result, .error { margin-top:8px; padding:10px; border-radius:6px; background:var(--card); }
+.error { color: #b91c1c; background: #fff1f2; }
+.note { color: var(--muted); font-size:14px; margin-top:18px; }

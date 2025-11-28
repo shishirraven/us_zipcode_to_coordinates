@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>zip-coords-us: Dynamic CDN Demo</title>
+    <!-- Load Tailwind CSS via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom styles for professional aesthetic */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f7f9fb;
+        }
+    </style>
+    <!-- 
+        CRITICAL: Load your published library from Unpkg CDN.
+        The browser requires the file to be bundled correctly in UMD/IIFE format
+        to expose the global variable 'ZipCoordsUS'.
+    -->
+    <script src="https://unpkg.com/zip-coords-us/dist/zip-coords-us.min.js"></script>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+
+    <div class="w-full max-w-3xl bg-white shadow-2xl rounded-xl p-8 space-y-8 border border-gray-100">
+        
+        <!-- Header and Description -->
+        <header class="text-center">
+            <h1 class="text-4xl font-extrabold text-gray-900 mb-2">📦 zip-coords-us Live Demo</h1>
+            <p class="text-lg text-gray-600">
+                Test the performance and accuracy of the <code>ZipCoordsUS.convert()</code> function directly via CDN.
+            </p>
+            <p class="text-sm text-gray-400 mt-1">
+                This demonstrates <strong>lazy loading</strong> (slow first search) and <strong>O(1) lookup</strong> (instant subsequent searches).
+            </p>
+        </header>
+
+        <!-- Input and Button -->
+        <div class="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
+            <input 
+                type="text" 
+                id="zipInput" 
+                placeholder="Enter 5-digit US ZIP Code (e.g., 10001, 90210)"
+                maxlength="5"
+                class="flex-grow p-3 border border-gray-300 rounded-lg focus:ring-blue-600 focus:border-blue-600 shadow-sm transition duration-150 text-base"
+            />
+            <button 
+                id="convertButton" 
+                onclick="handleConversion()"
+                class="bg-blue-600 text-white p-3 rounded-lg font-semibold hover:bg-blue-700 transition duration-200 shadow-md transform hover:scale-[1.01] active:scale-95 disabled:opacity-50"
+            >
+                Get Coordinates
+            </button>
+        </div>
+
+        <!-- Output Display -->
+        <div id="resultContainer" class="min-h-[120px] p-5 bg-gray-50 border border-gray-200 rounded-lg transition-all duration-300 flex items-center justify-center">
+            <p class="text-gray-500 italic" id="initialMessage">
+                Enter a ZIP code above or use an example button.
+            </p>
+            <!-- Dynamic results will appear here -->
+        </div>
+
+        <!-- Examples Section -->
+        <div class="mt-8 pt-4 border-t border-gray-200">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">Quick Test Examples</h2>
+            <div class="flex flex-wrap gap-3">
+                <button onclick="setZipAndConvert('10001')" class="example-btn">10001 (NYC)</button>
+                <button onclick="setZipAndConvert('90210')" class="example-btn">90210 (CA)</button>
+                <button onclick="setZipAndConvert('60601')" class="example-btn">60601 (Chicago)</button>
+                <button onclick="setZipAndConvert('00601')" class="example-btn">00601 (Puerto Rico)</button>
+                <button onclick="setZipAndConvert('88888')" class="example-btn bg-red-100 text-red-600 hover:bg-red-200 border-red-300">88888 (Invalid)</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const zipInput = document.getElementById('zipInput');
+        const resultContainer = document.getElementById('resultContainer');
+        const convertButton = document.getElementById('convertButton');
+        const initialMessage = document.getElementById('initialMessage');
+
+        // Initial check for the global variable
+        if (typeof ZipCoordsUS === 'undefined' || typeof ZipCoordsUS.convert !== 'function') {
+            document.getElementById('resultContainer').innerHTML = `
+                <div class="bg-red-50 border-l-4 border-red-500 text-red-700 p-4 rounded-md shadow-inner text-left">
+                    <p class="font-bold">🚨 Library Failed to Load</p>
+                    <p>The global variable <code>ZipCoordsUS</code> is missing. This confirms the CDN file is not correctly bundled in the UMD format (CommonJS code is likely still present). Please check your Rollup configuration and re-publish the fixed version.</p>
+                </div>
+            `;
+            // Disable button if library load failed entirely
+            convertButton.disabled = true;
+        }
+
+
+        // Styles for example buttons
+        document.querySelectorAll('.example-btn').forEach(button => {
+            if (!button.classList.contains('bg-red-100')) {
+                 button.classList.add('px-3', 'py-1', 'text-sm', 'bg-gray-100', 'text-gray-700', 'border', 'border-gray-300', 'rounded-full', 'hover:bg-blue-50', 'transition', 'duration-150');
+            }
+        });
+
+        function handleConversion() {
+            if (convertButton.disabled) return; // Prevent double click during processing
+
+            const zip = zipInput.value.trim();
+            if (zip.length !== 5 || isNaN(zip)) {
+                displayError("Please enter a valid 5-digit numeric ZIP code.");
+                return;
+            }
+            
+            convertButton.disabled = true;
+            resultContainer.innerHTML = `<div class="text-center text-blue-600 font-semibold py-4">Processing...</div>`;
+
+            // --- Core Logic: Library Call with Delayed Execution ---
+            const startTime = performance.now();
+
+            // SetTimeout ensures the UI (the "Processing..." message) updates 
+            // before the potentially synchronous, heavy initial JSON load runs.
+            setTimeout(() => {
+                let coords = null;
+                try {
+                     coords = ZipCoordsUS.convert(zip);
+                } catch (e) {
+                    displayError(`Execution Error in library: ${e.message}. Check console for details.`);
+                    console.error("Library Execution Error:", e);
+                    return;
+                }
+                
+                const endTime = performance.now();
+                const timeElapsed = (endTime - startTime).toFixed(3);
+
+                if (coords) {
+                    displaySuccess(zip, coords.latitude, coords.longitude, timeElapsed);
+                } else {
+                    displayNotFound(zip, timeElapsed);
+                }
+                convertButton.disabled = false;
+            }, 10); // A small delay ensures the UI update is visible
+        }
+
+        function setZipAndConvert(zip) {
+            zipInput.value = zip;
+            handleConversion();
+        }
+
+        function displayError(message) {
+            if(initialMessage) initialMessage.remove();
+
+            resultContainer.innerHTML = `
+                <div class="bg-red-50 border-l-4 border-red-500 text-red-700 p-4 rounded-md shadow-inner text-left">
+                    <p class="font-bold">Error/Invalid Input</p>
+                    <p>${message}</p>
+                </div>
+            `;
+            convertButton.disabled = false;
+        }
+
+        function displayNotFound(zip, time) {
+             if(initialMessage) initialMessage.remove();
+
+             resultContainer.innerHTML = `
+                <div class="bg-yellow-50 border-l-4 border-yellow-500 text-yellow-700 p-4 rounded-md shadow-inner text-left">
+                    <p class="font-bold">Lookup Failed for ${zip}</p>
+                    <p>ZIP Code not found in the dataset.</p>
+                    <p class="text-sm mt-2 text-gray-500">Lookup Time: ${time} ms</p>
+                </div>
+            `;
+            convertButton.disabled = false;
+        }
+
+        function displaySuccess(zip, lat, lng, time) {
+            if(initialMessage) initialMessage.remove();
+
+            // Title changes based on whether this was the slow initial load or a fast subsequent lookup
+            const isInitialLoad = parseFloat(time) > 100; // Heuristic for initial (slow) JSON file load
+            const statusTitle = isInitialLoad 
+                ? 'Data Loaded & Found (Initial Load)' 
+                : 'Lookup Successful (Instant)';
+            
+            const statusColor = isInitialLoad ? 'border-purple-500 text-purple-700' : 'border-green-500 text-green-700';
+            const bgColor = isInitialLoad ? 'bg-purple-50' : 'bg-green-50';
+            
+            resultContainer.innerHTML = `
+                <div class="${bgColor} border-l-4 ${statusColor} p-4 rounded-md shadow-inner text-left">
+                    <p class="font-bold">${statusTitle}</p>
+                    <div class="mt-2 space-y-1 text-gray-800">
+                        <p><strong>ZIP Code:</strong> <code class="text-blue-600">${zip}</code></p>
+                        <p><strong>Latitude:</strong> <code class="text-green-600">${lat}</code></p>
+                        <p><strong>Longitude:</strong> <code class="text-green-600">${lng}</code></p>
+                        <p class="text-sm mt-3 text-gray-500">Execution Time: ${time} ms</p>
+                    </div>
+                </div>
+            `;
+            convertButton.disabled = false;
+        }
+        
+        // Allow pressing Enter in the input field to trigger the conversion
+        zipInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault(); 
+                document.getElementById('convertButton').click();
+            }
+        });
+
+    </script>
+</body>
+</html>

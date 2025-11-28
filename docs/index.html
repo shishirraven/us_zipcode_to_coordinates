@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>zip-coords-us — Docs</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header>
+    <h1>zip-coords-us</h1>
+    <p>Small, fast ZIP → coordinates lookup library for U.S. 5-digit ZIP codes.</p>
+    <nav>
+      <a href="index.html">Docs</a>
+      <a href="demo.html">Interactive Demo</a>
+      <a href="../readme.md">README</a>
+    </nav>
+  </header>
+
+  <main>
+    <section>
+      <h2>Quick Start</h2>
+      <p>Install and build as described in the project README. The interactive demo will try to load the local UMD build (<code>dist/zip-coords-us.min.js</code>) and fall back to the CDN.</p>
+    </section>
+
+    <section>
+      <h2>API</h2>
+      <p>The primary API is <code>convert(zip)</code> which returns <code>{ latitude, longitude }</code> or <code>null</code>.</p>
+      <pre>
+convert('10001') → { latitude: 40.7506, longitude: -73.9970 }
+      </pre>
+    </section>
+
+    <section>
+      <h2>Publish</h2>
+      <ol>
+        <li>Push this repo to GitHub.</li>
+        <li>Repository → Settings → Pages → Source: select branch and <code>docs/</code> folder.</li>
+        <li>Visit the provided Pages URL.</li>
+      </ol>
+    </section>
+  </main>
+
+  <footer>
+    <p>Built for fast O(1) ZIP → coords lookups. Demo uses UMD global <code>ZipCoordsUS</code>.</p>
+  </footer>
+
+  <script>
+    // lightweight enhancement: highlight nav current page
+    document.querySelectorAll('nav a').forEach(a => {
+      if (a.getAttribute('href') === location.pathname.split('/').pop()) a.classList.add('active');
+    });
+  </script>
+</body>
+</html>
